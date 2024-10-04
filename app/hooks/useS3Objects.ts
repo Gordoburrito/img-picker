@@ -3,19 +3,28 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { listObjects } from "../../services/s3Service";
 
+interface S3Object {
+  Key: string;
+  Metadata: Record<string, string>;
+  // ... other properties
+}
+
+interface Filters {
+  keywords?: string;
+  title?: string;
+  componentName?: string;
+  width?: number;
+  height?: number;
+  template?: string;
+  type?: string;
+}
+
 const useS3Objects = (
   bucketName: string,
-  filters: {
-    keywords?: string;
-    title?: string;
-    componentName?: string;
-    width?: number;
-    height?: number;
-    template?: string;
-    type?: string;
-  } = {}
+  filters: Filters = {},
+  groupByMetadataKey?: string
 ) => {
-  const [objects, setObjects] = useState<any[]>([]);
+  const [objects, setObjects] = useState<S3Object[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -31,43 +40,38 @@ const useS3Objects = (
     fetchObjects();
   }, [bucketName]);
 
-  // const filterObjects = useCallback((objectList: any[]) => {
-  //   return objectList.filter((obj) => {
-  //     if (filters.keywords && !obj.keywords.includes(filters.keywords)) return false;
-  //     if (filters.title && !obj.title.includes(filters.title)) return false;
-  //     if (filters.componentName && obj.componentName !== filters.componentName) return false;
-  //     if (filters.width && obj.width !== filters.width) return false;
-  //     if (filters.height && obj.height !== filters.height) return false;
-  //     if (filters.template && obj.template !== filters.template) return false;
-  //     return true;
-  //   });
-  // }, [filters]);
+  const filterObjects = useCallback((objectList: S3Object[]) => {
+    return objectList.filter((obj) => {
+      if (filters.keywords && !obj.Metadata.keywords?.includes(filters.keywords)) return false;
+      if (filters.title && !obj.Metadata.title?.includes(filters.title)) return false;
+      if (filters.componentName && obj.Metadata.componentName !== filters.componentName) return false;
+      if (filters.width && obj.Metadata.width !== filters.width.toString()) return false;
+      if (filters.height && obj.Metadata.height !== filters.height.toString()) return false;
+      if (filters.template && obj.Metadata.template !== filters.template) return false;
+      if (filters.type && obj.Metadata.type !== filters.type) return false;
+      return true;
+    });
+  }, [filters]);
 
-  // const memoizedFilters = useMemo(() => filters, [
-  //   filters.keywords,
-  //   filters.title,
-  //   filters.componentName,
-  //   filters.width,
-  //   filters.height,
-  //   filters.template,
-  //   filters.type
-  // ]);
+  const groupObjects = useCallback((objectList: S3Object[]) => {
+    if (!groupByMetadataKey) return objectList;
 
-  // useEffect(() => {
-  //   const fetchObjects = async () => {
-  //     try {
-  //       const objectList = await listObjects(bucketName);
-  //       const filteredObjects = filterObjects(objectList);
-  //       setObjects(filteredObjects);
-  //     } catch (err) {
-  //       setError("Failed to fetch objects");
-  //     }
-  //   };
+    return objectList.reduce((acc, obj) => {
+      const metadataValue = obj.Metadata[groupByMetadataKey] || 'undefined';
+      if (!acc[metadataValue]) {
+        acc[metadataValue] = [];
+      }
+      acc[metadataValue].push(obj);
+      return acc;
+    }, {} as Record<string, S3Object[]>);
+  }, [groupByMetadataKey]);
 
-  //   fetchObjects();
-  // }, [bucketName, memoizedFilters, filterObjects]);
+  const filteredAndGroupedObjects = useMemo(() => {
+    const filteredObjects = filterObjects(objects);
+    return groupObjects(filteredObjects);
+  }, [objects, filterObjects, groupObjects]);
 
-  return { objects, error };
+  return { objects: filteredAndGroupedObjects, error };
 };
 
 export default useS3Objects;
