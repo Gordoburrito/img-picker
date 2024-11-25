@@ -1,5 +1,6 @@
 import Image from "next/image";
 import ObjectList from "../components/ObjectList";
+import FolderUploader from "../components/FolderUploader";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
         
         {/* Add ObjectList component here */}
         <ObjectList bucketName="rg-templates-assets" />
+        <FolderUploader bucketName="rg-templates-assets" />
       </main>
     </div>
   );

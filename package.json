@@ -11,9 +11,13 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.664.0",
     "@aws-sdk/credential-providers": "^3.664.0",
+    "exif-js": "^2.3.0",
+    "formidable": "^3.5.1",
     "next": "14.2.14",
+    "openai": "^4.73.1",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-dropzone": "^14.2.9"
   },
   "devDependencies": {
     "@types/node": "^20",
