@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import EXIF from 'exif-js';
 import { processImage } from '../services/processImage';
 import { resizeImage } from '../services/imageUtils';
+import { uploadFile } from '../services/uploadFile';
 
 interface FolderUploaderProps {
   bucketName: string;
@@ -19,6 +20,9 @@ const processImageFile = async (file: File, formData: FormData) => {
       formData.append('x-amz-meta-width', img.width.toString());
       formData.append('x-amz-meta-height', img.height.toString());
       
+      console.log('img.width', img.width);
+      console.log('img.height', img.height);
+
       // Resize and convert image
       // const { base64String, mimeType } = await resizeImage(file);
       // console.log('base64String', base64String);
@@ -31,10 +35,6 @@ const processImageFile = async (file: File, formData: FormData) => {
 
       formData.append('x-amz-meta-keywords', keywords);
       formData.append('x-amz-meta-title', title);
-
-      EXIF.getData(img, function() {
-        // Handle EXIF data if needed
-      });
 
       URL.revokeObjectURL(img.src);
       resolve(null);
@@ -69,7 +69,6 @@ const FolderUploader: React.FC<FolderUploaderProps> = ({ bucketName }) => {
       if (file.type.startsWith('image/')) {
         await processImageFile(file, formData);
       } else {
-        // Default metadata for non-image files
         formData.append('x-amz-meta-componentname', file.name);
         formData.append('x-amz-meta-keywords', file.name);
         formData.append('x-amz-meta-template', file.name);
@@ -77,10 +76,10 @@ const FolderUploader: React.FC<FolderUploaderProps> = ({ bucketName }) => {
       }
 
       try {
-        // const result = await uploadFile(formData);
-        // if (!result.success) {
-        //   throw new Error(result.message);
-        // }
+        const result = await uploadFile(formData);
+        if (!result.success) {
+          throw new Error(result.message);
+        }
       } catch (error) {
         console.error('Error uploading file:', error);
         setUploadStatus('Upload failed');

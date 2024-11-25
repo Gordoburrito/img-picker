@@ -7,12 +7,14 @@ interface ImageCardProps {
   showMetadata?: boolean;
 }
 
+// TODO: Make this dynamic based on the cloudfront distribution
 const url = "https://d25xczrsvvsqdg.cloudfront.net/";
 
 const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) => {
   const { Key, Metadata } = object;
   const imageUrl = `${url}${Key}`;
   const { title, keywords, width, height } = Metadata;
+  console.log('Metadata', Metadata);
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -33,6 +35,8 @@ const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) =>
   };
 
   const backgroundColor = getBackgroundColor();
+
+  console.log('imageUrl', imageUrl);
 
   return (
     <div 

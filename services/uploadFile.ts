@@ -1,8 +1,11 @@
 'use server'
 import s3Client from './s3Client';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
+
 export async function uploadFile(formData: FormData) {
+  console.log('formData', formData);
   const file = formData.get('file') as File;
+  console.log('file', file);
   const bucketName = formData.get('bucketName') as string;
 
   if (!file || !bucketName) {
@@ -16,12 +19,12 @@ export async function uploadFile(formData: FormData) {
     Key: file.name,
     Body: buffer,
     Metadata: {
-      'x-amz-meta-componentname': formData.get('x-amz-meta-componentname') as string,
-      'x-amz-meta-height': formData.get('x-amz-meta-height') as string,
-      'x-amz-meta-keywords': formData.get('x-amz-meta-keywords') as string,
-      'x-amz-meta-template': formData.get('x-amz-meta-template') as string,
-      'x-amz-meta-title': formData.get('x-amz-meta-title') as string,
-      'x-amz-meta-width': formData.get('x-amz-meta-width') as string,
+      'componentname': formData.get('x-amz-meta-componentname') as string,
+      'height': formData.get('x-amz-meta-height') as string,
+      'keywords': formData.get('x-amz-meta-keywords') as string,
+      'template': formData.get('x-amz-meta-template') as string,
+      'title': formData.get('x-amz-meta-title') as string,
+      'width': formData.get('x-amz-meta-width') as string,
     },
   };
 
