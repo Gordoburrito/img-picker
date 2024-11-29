@@ -47,13 +47,13 @@ const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) =>
     >
       <img src={imageUrl} alt={title} className="w-full h-auto" />
       {copied && (
-        <div className={`absolute inset-0 flex items-center justify-center ${backgroundColor} bg-opacity-80`}>
+        <div className={`absolute inset-0 flex items-center justify-center bg-white bg-opacity-80`}>
           <span className="text-white text-2xl font-bold bg-black px-4 py-2 rounded-lg">Copied</span>
         </div>
       )}
       {showMetadata ? (
         <div className="p-4 space-y-3">
-          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+          <h3 className="text-lg font-semibold text-gray-800 h-[3rem] leading-6 overflow-hidden line-clamp-2">{title}</h3>
           
           <div className="grid gap-2 text-sm">
             <div className="flex items-center text-gray-600">
