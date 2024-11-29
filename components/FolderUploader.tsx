@@ -11,7 +11,15 @@ interface FolderUploaderProps {
   bucketName: string;
 }
 
-const processImageFile = async (file: File, formData: FormData) => {
+// Add this outside the component to store metadata across uploads
+const metadataCache = new Map<string, { title: string, keywords: string }>();
+
+const getBaseFileName = (fullPath: string): string => {
+  const fileName = fullPath.split('/').pop() || '';
+  return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+};
+
+const setImageMetadata = async (file: File, formData: FormData) => {
   const img = new Image();
   img.src = URL.createObjectURL(file);
   
@@ -20,21 +28,23 @@ const processImageFile = async (file: File, formData: FormData) => {
       formData.append('x-amz-meta-width', img.width.toString());
       formData.append('x-amz-meta-height', img.height.toString());
       
-      console.log('img.width', img.width);
-      console.log('img.height', img.height);
+      const baseFileName = getBaseFileName(file.path);
+      const cachedMetadata = metadataCache.get(baseFileName);
 
-      // Resize and convert image
-      // const { base64String, mimeType } = await resizeImage(file);
-      // console.log('base64String', base64String);
+      if (cachedMetadata) {
+        // Use cached metadata if available
+        formData.append('x-amz-meta-keywords', cachedMetadata.keywords);
+        formData.append('x-amz-meta-title', cachedMetadata.title);
+      } else {
+        const { base64String, mimeType } = await resizeImage(file);
+        const { title, keywords } = await processImage(base64String, mimeType);
 
-      // const { title, keywords } = await processImage(base64String, mimeType);
-      const title = 'test';
-      const keywords = 'test';
-      console.log('title', title);
-      console.log('keywords', keywords);
+        // Cache the metadata for files with the same base name
+        metadataCache.set(baseFileName, { title, keywords });
 
-      formData.append('x-amz-meta-keywords', keywords);
-      formData.append('x-amz-meta-title', title);
+        formData.append('x-amz-meta-keywords', keywords);
+        formData.append('x-amz-meta-title', title);
+      }
 
       URL.revokeObjectURL(img.src);
       resolve(null);
@@ -42,7 +52,7 @@ const processImageFile = async (file: File, formData: FormData) => {
   });
 };
 
-const prepareFileUpload = (file: File, bucketName: string) => {
+const createFileUploadFormData = (file: File, bucketName: string) => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('bucketName', bucketName);
@@ -53,7 +63,7 @@ const prepareFileUpload = (file: File, bucketName: string) => {
   // Extract folder name from path
   const folderName = fullPath.split('/').slice(-2, -1)[0] || 'unknown';
   formData.append('x-amz-meta-componentname', folderName);
-
+  
   return formData;
 };
 
@@ -64,18 +74,18 @@ const FolderUploader: React.FC<FolderUploaderProps> = ({ bucketName }) => {
     setUploadStatus('Uploading...');
 
     for (const file of acceptedFiles) {
-      const formData = prepareFileUpload(file, bucketName);
+      const formData = createFileUploadFormData(file, bucketName);
 
       if (file.type.startsWith('image/')) {
-        await processImageFile(file, formData);
-      } else {
-        formData.append('x-amz-meta-componentname', file.name);
-        formData.append('x-amz-meta-keywords', file.name);
-        formData.append('x-amz-meta-template', file.name);
-        formData.append('x-amz-meta-title', file.name);
+        await setImageMetadata(file, formData);
       }
 
       try {
+        console.log('file', file);
+        // Convert FormData to JSON object
+        const formDataObj = Object.fromEntries(formData.entries());
+        console.log('formData as JSON:', formDataObj);
+        
         const result = await uploadFile(formData);
         if (!result.success) {
           throw new Error(result.message);

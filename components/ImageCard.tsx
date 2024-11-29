@@ -13,8 +13,8 @@ const url = "https://d25xczrsvvsqdg.cloudfront.net/";
 const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) => {
   const { Key, Metadata } = object;
   const imageUrl = `${url}${Key}`;
-  const { title, keywords, width, height } = Metadata;
-  console.log('Metadata', Metadata);
+  const { title, keywords, width, height, componentname } = Metadata;
+
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -29,14 +29,15 @@ const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) =>
   const getBackgroundColor = () => {
     const baseColor = Key.endsWith('.jpg') ? 'green' : Key.endsWith('.webp') ? 'blue' : 'gray';
     const shade = showMetadata ? '100' : '400';
-    // console.log(`bg-${baseColor}-${shade}`);
-    // return `bg-green-400`;
     return `bg-${baseColor}-${shade}`;
   };
 
   const backgroundColor = getBackgroundColor();
 
-  console.log('imageUrl', imageUrl);
+  const getFileType = (key: string) => {
+    const extension = key.split('.').pop()?.toLowerCase() || '';
+    return extension;
+  };
 
   return (
     <div 
@@ -51,14 +52,31 @@ const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) =>
         </div>
       )}
       {showMetadata ? (
-        <div className="p-4">
-          <div className="text-lg font-bold mb-2">{title}</div>
-          <div className="text-sm text-gray-600 mb-1">Keywords: {keywords}</div>
-          <div className="text-sm text-gray-600 mb-1">Dimensions: {width}x{height}</div>
-          <div className="text-sm text-gray-600 mb-1">{Key}</div>
+        <div className="p-4 space-y-3">
+          <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+          
+          <div className="grid gap-2 text-sm">
+            <div className="flex items-center text-gray-600">
+              <span className="font-medium min-w-20 mr-2">Keywords:</span>
+              <span className="text-gray-700">{keywords}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <span className="font-medium min-w-20 mr-2">Dimensions:</span>
+              <span className="text-gray-700">{width} × {height}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <span className="font-medium min-w-20 mr-2">Component:</span>
+              <span className="text-gray-700">{componentname}</span>
+            </div>
+          </div>
+
+            <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 rounded px-2 py-1">
+            <span className="truncate pr-2 font-mono text-xs">{Key}</span>
+            <span className="uppercase font-medium text-xs bg-gray-200 px-2 py-0.5 rounded">{getFileType(Key)}</span>
+          </div>
         </div>
       ) : (
-        <div className={`p-2 ${backgroundColor[1-3]}`}></div>
+        <div className={`p-2 ${backgroundColor}`}></div>
       )}
     </div>
   );
