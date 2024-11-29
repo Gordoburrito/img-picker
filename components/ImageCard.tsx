@@ -42,10 +42,16 @@ const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) =>
   return (
     <div 
       onClick={copyToClipboard} 
-      className={`cursor-pointer rounded-lg ${backgroundColor} relative overflow-hidden`}
+      className={`cursor-pointer rounded-lg ${backgroundColor} relative overflow-hidden w-full max-w-sm`}
       title="Click to copy URL to clipboard"
     >
-      <img src={imageUrl} alt={title} className="w-full h-auto" />
+      <div className="aspect-[4/3] relative">
+        <img 
+          src={imageUrl} 
+          alt={title} 
+          className="absolute inset-0 w-full h-full object-contain" 
+        />
+      </div>
       {copied && (
         <div className={`absolute inset-0 flex items-center justify-center bg-white bg-opacity-80`}>
           <span className="text-white text-2xl font-bold bg-black px-4 py-2 rounded-lg">Copied</span>
@@ -58,7 +64,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ object, showMetadata = true }) =>
           <div className="grid gap-2 text-sm">
             <div className="flex items-center text-gray-600">
               <span className="font-medium min-w-20 mr-2">Keywords:</span>
-              <span className="text-gray-700">{keywords}</span>
+              <span className="text-gray-700 line-clamp-5">{keywords}</span>
             </div>
             <div className="flex items-center text-gray-600">
               <span className="font-medium min-w-20 mr-2">Dimensions:</span>

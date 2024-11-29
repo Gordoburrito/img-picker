@@ -15,7 +15,7 @@ export async function processImage(base64String: string, mimeType: string): Prom
           content: [
             {
               type: "text",
-              text: "Respond with valid JSON only, in this format: {\"title\": \"short title here\", \"keywords\": \"comma separated keywords here\"}\n\nAnalyze this image and provide:\n1. A short, descriptive title (max 6 words)\n2. Keywords describing the main elements (max 20 words)",
+              text: "Respond with valid JSON only, in this format: {\"title\": \"short title here\", \"keywords\": \"comma separated keywords here\"}\n\nAnalyze this image and provide:\n1. A short, descriptive title (max 6 words)\n2. Analyze the content and generate descriptive keywords that capture:\n   - Main elements and subjects\n   - Broad categories or themes\n   - Visual characteristics and style\n   - Contextual information\n   - Mood or emotions conveyed\n   - Potential use cases\n\nProvide keywords as a comma-separated list (max 30 words total).",
             },
             {
               type: "image_url",
