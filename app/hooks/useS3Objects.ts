@@ -3,11 +3,18 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { listObjects } from "../../services/s3Service";
 
-interface S3Object {
+type S3Object = {
   Key: string;
-  Metadata: Record<string, string>;
-  // ... other properties
-}
+  LastModified?: Date;
+  ETag?: string;
+  Size?: number;
+  StorageClass?: string;
+  Owner?: {
+    DisplayName?: string;
+    ID?: string;
+  };
+  Metadata?: Record<string, string>;
+};
 
 interface Filters {
   keywords?: string;
@@ -31,7 +38,7 @@ const useS3Objects = (
     const fetchObjects = async () => {
       try {
         const objectList = await listObjects(bucketName);
-        setObjects(objectList);
+        setObjects(objectList as S3Object[]);
       } catch (_err) {
         setError("Failed to fetch objects");
       }
@@ -42,13 +49,13 @@ const useS3Objects = (
 
   const filterObjects = useCallback((objectList: S3Object[]) => {
     return objectList.filter((obj) => {
-      if (filters.keywords && !obj.Metadata.keywords?.includes(filters.keywords)) return false;
-      if (filters.title && !obj.Metadata.title?.includes(filters.title)) return false;
-      if (filters.componentName && obj.Metadata.componentName !== filters.componentName) return false;
-      if (filters.width && obj.Metadata.width !== filters.width.toString()) return false;
-      if (filters.height && obj.Metadata.height !== filters.height.toString()) return false;
-      if (filters.template && obj.Metadata.template !== filters.template) return false;
-      if (filters.type && obj.Metadata.type !== filters.type) return false;
+      if (filters.keywords && !obj.Metadata?.keywords?.includes(filters.keywords)) return false;
+      if (filters.title && !obj.Metadata?.title?.includes(filters.title)) return false;
+      if (filters.componentName && obj.Metadata?.componentName !== filters.componentName) return false;
+      if (filters.width && obj.Metadata?.width !== filters.width.toString()) return false;
+      if (filters.height && obj.Metadata?.height !== filters.height.toString()) return false;
+      if (filters.template && obj.Metadata?.template !== filters.template) return false;
+      if (filters.type && obj.Metadata?.type !== filters.type) return false;
       return true;
     });
   }, [filters]);
@@ -57,7 +64,7 @@ const useS3Objects = (
     if (!groupByMetadataKey) return objectList;
 
     return objectList.reduce((acc, obj) => {
-      const metadataValue = obj.Metadata[groupByMetadataKey] || 'undefined';
+      const metadataValue = obj.Metadata?.[groupByMetadataKey] || 'undefined';
       if (!acc[metadataValue]) {
         acc[metadataValue] = [];
       }

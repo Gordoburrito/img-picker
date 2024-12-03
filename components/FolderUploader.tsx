@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, FileWithPath } from 'react-dropzone';
 import { processImage } from '../services/processImage';
 import { resizeImage } from '../services/imageUtils';
 import { uploadFile } from '../services/uploadFile';
@@ -18,7 +18,7 @@ const getBaseFileName = (fullPath: string): string => {
   return fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
 };
 
-const setImageMetadata = async (file: File, formData: FormData) => {
+const setImageMetadata = async (file: FileWithPath, formData: FormData) => {
   const img = new Image();
   img.src = URL.createObjectURL(file);
   
@@ -51,7 +51,7 @@ const setImageMetadata = async (file: File, formData: FormData) => {
   });
 };
 
-const createFileUploadFormData = (file: File, bucketName: string) => {
+const createFileUploadFormData = (file: FileWithPath, bucketName: string) => {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('bucketName', bucketName);
@@ -69,7 +69,7 @@ const createFileUploadFormData = (file: File, bucketName: string) => {
 const FolderUploader: React.FC<FolderUploaderProps> = ({ bucketName }) => {
   const [uploadStatus, setUploadStatus] = useState<string>('');
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: FileWithPath[]) => {
     setUploadStatus('Uploading...');
 
     for (const file of acceptedFiles) {
