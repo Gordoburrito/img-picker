@@ -32,7 +32,7 @@ const useS3Objects = (
       try {
         const objectList = await listObjects(bucketName);
         setObjects(objectList);
-      } catch (err) {
+      } catch (_err) {
         setError("Failed to fetch objects");
       }
     };

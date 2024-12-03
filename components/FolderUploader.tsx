@@ -2,7 +2,6 @@
 
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import EXIF from 'exif-js';
 import { processImage } from '../services/processImage';
 import { resizeImage } from '../services/imageUtils';
 import { uploadFile } from '../services/uploadFile';
