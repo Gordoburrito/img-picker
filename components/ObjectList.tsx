@@ -15,9 +15,10 @@ const ObjectList: React.FC<{ bucketName: string }> = ({ bucketName }) => {
   // Filter objects based on search and dimensions
   const filteredObjects = useMemo(() => {
     return objects.filter((obj) => {
-      const matchesSearch = obj.Metadata.keywords.toLowerCase().includes(searchQuery.toLowerCase());
+      const keywords = obj.Metadata?.keywords || '';
+      const matchesSearch = keywords.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesDimensions = selectedDimensions.length === 0 ||
-        (obj.Metadata.width && obj.Metadata.height && 
+        (obj.Metadata?.width && obj.Metadata?.height && 
           selectedDimensions.includes(`${obj.Metadata.width}x${obj.Metadata.height}`));
       return matchesSearch && matchesDimensions;
     });
